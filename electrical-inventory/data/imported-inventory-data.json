@@ -1,0 +1,223 @@
+{
+  "system_info": {
+    "system_name": "EXIMUS – Professional Electrical Inventory Management System",
+    "company": "EXIMUS",
+    "source_file": "OFFICE ELECTRICAL INVENTORY (2026.07.01).xlsx",
+    "import_date": "2026-07-01",
+    "version": "1.0.0",
+    "summary": {
+      "total_master_items": 247,
+      "total_worksheet_01_items": 243,
+      "total_categories": 4,
+      "total_locations": 16,
+      "total_warehouses": 5,
+      "total_warehouse_transfers": 1,
+      "total_issued_records": 2,
+      "total_permanent_records": 2,
+      "total_new_purchases": 2,
+      "duplicate_records_requiring_review": 0,
+      "skipped_or_invalid_records": 0
+    }
+  },
+  "categories": [
+    {
+      "id": "CAT-01",
+      "name": "HAND TOOLS",
+      "code": "HT",
+      "description": "Manual hand tools, wrenches, cutters, screwdrivers, pliers, and measuring instruments.",
+      "color": "#2563eb",
+      "icon": "wrench"
+    },
+    {
+      "id": "CAT-02",
+      "name": "MATERIALS",
+      "code": "MAT",
+      "description": "Electrical installation materials, cables, connectors, wire markers, fasteners, and safety gear.",
+      "color": "#10b981",
+      "icon": "package"
+    },
+    {
+      "id": "CAT-03",
+      "name": "POWER EQUIPMENT",
+      "code": "PE",
+      "description": "Power drills, blowers, grinders, saw frames, battery packs, and heavy power tools.",
+      "color": "#f59e0b",
+      "icon": "zap"
+    },
+    {
+      "id": "CAT-04",
+      "name": "SWITCH GEARS",
+      "code": "SG",
+      "description": "Distribution boards, MCCBs, MCBs, RCCBs, SPDs, isolators, and modular sockets.",
+      "color": "#8b5cf6",
+      "icon": "cpu"
+    }
+  ],
+  "locations": [
+    { "id": "LOC-01", "no": 1, "name": "PAPYRA White Box", "sub_location": "Second shelf" },
+    { "id": "LOC-02", "no": 2, "name": "Broken Cardboard Box", "sub_location": "On floor at left side" },
+    { "id": "LOC-03", "no": 3, "name": "Toolbox", "sub_location": "Last shelf's center" },
+    { "id": "LOC-04", "no": 4, "name": "Bond's Bag", "sub_location": "Field Pack Area" },
+    { "id": "LOC-05", "no": 5, "name": "XCORT Box", "sub_location": "Tool Shelf" },
+    { "id": "LOC-06", "no": 6, "name": "AIRAJ Green Tool Bag", "sub_location": "Last shelf's left side" },
+    { "id": "LOC-07", "no": 7, "name": "Mebote Box", "sub_location": "Green color box" },
+    { "id": "LOC-08", "no": 8, "name": "Top of White Cupboard", "sub_location": "Outside inventory room" },
+    { "id": "LOC-09", "no": 9, "name": "KYORITSU Box", "sub_location": "Testing Instruments Shelf" },
+    { "id": "LOC-10", "no": 10, "name": "DOUYI Bag", "sub_location": "Black color bag" },
+    { "id": "LOC-11", "no": 11, "name": "No Name (looks similar to DOUYI)", "sub_location": "Testing Instruments Shelf" },
+    { "id": "LOC-12", "no": 12, "name": "1st Drawer, 3rd Drawer", "sub_location": "Office Cabinet Drawers" },
+    { "id": "LOC-13", "no": 13, "name": "Safely Shoes Cardboard Box", "sub_location": "PPE Storage Area" },
+    { "id": "LOC-14", "no": 14, "name": "Office Desk Pedestal Cabinet", "sub_location": "Administrative Office" },
+    { "id": "LOC-15", "no": 15, "name": "X-Huawei Cardboard Box", "sub_location": "Hardware Shelf" },
+    { "id": "LOC-16", "no": 16, "name": "Benz Bag", "sub_location": "Field Pack Area" }
+  ],
+  "warehouses": [
+    {
+      "id": "WH-01",
+      "code": "WH-01",
+      "name": "Main Central Warehouse",
+      "location": "Head Office Complex, Colombo",
+      "manager": "Mr. Danushka (Senior Site Admin)",
+      "contact": "+94 11 234 5678",
+      "type": "Central Hub",
+      "is_default": true,
+      "description": "Primary central distribution store for electrical components, tools, cables, and switchgear."
+    },
+    {
+      "id": "WH-02",
+      "code": "WH-02",
+      "name": "Site A Storage Depot",
+      "location": "Project Site Alpha (Residential Solar)",
+      "manager": "Site Engineer 1",
+      "contact": "+94 77 123 4567",
+      "type": "Site Store",
+      "is_default": false,
+      "description": "Active field container depot for ongoing rooftop solar PV installation."
+    },
+    {
+      "id": "WH-03",
+      "code": "WH-03",
+      "name": "Site B Field Store",
+      "location": "Commercial Site Beta",
+      "manager": "Site Engineer 2",
+      "contact": "+94 71 987 6543",
+      "type": "Site Store",
+      "is_default": false,
+      "description": "Commercial factory site storage for electrical switchgear and cabling."
+    },
+    {
+      "id": "WH-04",
+      "code": "WH-04",
+      "name": "Project Solar Staging Yard",
+      "location": "Logistics Yard, Industrial Zone",
+      "manager": "Logistics Officer",
+      "contact": "+94 76 555 4321",
+      "type": "Staging Yard",
+      "is_default": false,
+      "description": "Heavy staging yard for bulk cable drums, solar inverters, and staging equipment."
+    },
+    {
+      "id": "WH-05",
+      "code": "WH-05",
+      "name": "Technical Workshop & Service Store",
+      "location": "Testing & Maintenance Facility",
+      "manager": "Lead Technician",
+      "contact": "+94 70 888 9999",
+      "type": "Workshop",
+      "is_default": false,
+      "description": "Testing facility for power tools calibration, meter diagnostics, and servicing."
+    }
+  ],
+  "warehouse_transfers": [
+    {
+      "id": "TRF-001",
+      "transfer_no": "TRF-2026-001",
+      "date": "2026-07-15",
+      "from_warehouse_id": "WH-01",
+      "from_warehouse_name": "Main Central Warehouse",
+      "to_warehouse_id": "WH-02",
+      "to_warehouse_name": "Site A Storage Depot",
+      "item_id": "MAT-127",
+      "item_code": "ELE-00F-07",
+      "item_name": "Safety Jackets",
+      "quantity": 2,
+      "unit": "Pcs",
+      "authorized_by": "Mr. Danushka",
+      "driver_info": "Vehicle WP-CA-4521 / Driver K. Perera",
+      "status": "COMPLETED",
+      "notes": "Stock transfer of safety vests for Site Alpha deployment"
+    }
+  ],
+  "issued_items": [
+    {
+      "id": "ISS-001",
+      "date_issued": "2026-07-02",
+      "issued_to": "Field Engineering Team",
+      "item_id": "MAT-134",
+      "item_name": "Saftey Helmets",
+      "quantity": 6,
+      "returned_date": "2026-07-16",
+      "returned_quantity": 6,
+      "status": "RETURNED"
+    },
+    {
+      "id": "ISS-002",
+      "date_issued": "2026-07-02",
+      "issued_to": "Field Engineering Team",
+      "item_id": "MAT-127",
+      "item_name": "Safety Jackets",
+      "quantity": 4,
+      "returned_date": "2026-07-16",
+      "returned_quantity": 4,
+      "status": "RETURNED"
+    }
+  ],
+  "permanent_returnable": [
+    {
+      "id": "PR-001",
+      "date_issued": "2026-07-10",
+      "issued_to": "Mr. Danushka",
+      "item_name": "Saftey Helmets",
+      "description": "Permanently Issued",
+      "issue_type": "PERMANENT",
+      "quantity": 1
+    },
+    {
+      "id": "PR-002",
+      "date_issued": "2026-07-10",
+      "issued_to": "Mr. Danushka",
+      "item_name": "Saftey Jacket",
+      "description": "Permanently Issued",
+      "issue_type": "PERMANENT",
+      "quantity": 1
+    }
+  ],
+  "new_purchases": [
+    {
+      "id": "PUR-001",
+      "purchase_date": "2026-07-09",
+      "item_name": "Saftey Jackets",
+      "quantity": 5,
+      "unit": "Pcs"
+    },
+    {
+      "id": "PUR-002",
+      "purchase_date": "2026-10-13",
+      "item_name": "Extension Code",
+      "quantity": 2,
+      "unit": "Nos"
+    }
+  ],
+  "import_log": {
+    "source_file": "OFFICE ELECTRICAL INVENTORY (2026.07.01).xlsx",
+    "imported_worksheets": [
+      { "name": "2026.07.01", "records_count": 243, "status": "VERIFIED" },
+      { "name": "Master Sheet", "records_count": 247, "status": "VERIFIED" },
+      { "name": "Issued Items", "records_count": 2, "status": "VERIFIED" },
+      { "name": "PermanetReturnable", "records_count": 2, "status": "VERIFIED" },
+      { "name": "New Purchases", "records_count": 2, "status": "VERIFIED" },
+      { "name": "Location", "records_count": 16, "status": "VERIFIED" }
+    ],
+    "verification_checksum": "EXIMUS-SHA256-OK"
+  }
+}
