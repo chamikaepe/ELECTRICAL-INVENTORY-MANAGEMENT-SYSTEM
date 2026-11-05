@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EXIMIUS POWER AND ENERGY – Electrical Inventory Management System</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            sidebar: '#0f172a',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Application Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- External Libraries -->
+  <!-- SheetJS (XLSX) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Logo Fallback Handler -->
+  <script>
+    function handleAppLogoError(img) {
+      var fallbacks = [
+        'assets/images/logo.svg',
+        'assets/images/eximius-logo.svg',
+        'logo.svg',
+        '../logo.svg',
+        'https://eximiuspe.com/wp-content/uploads/2024/08/Eximius-Logo-High-Resolution-PDF.pdf.png'
+      ];
+      var curIdx = parseInt(img.getAttribute('data-fallback-idx') || '0', 10);
+      if (curIdx < fallbacks.length - 1) {
+        curIdx++;
+        img.setAttribute('data-fallback-idx', curIdx);
+        img.src = fallbacks[curIdx];
+        if (fallbacks[curIdx].indexOf('eximiuspe.com') !== -1) {
+          img.style.height = '60px';
+          img.style.transform = 'scale(1.4)';
+          img.style.transformOrigin = 'left center';
+        }
+      } else {
+        img.onerror = null;
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-900 flex h-screen overflow-hidden">
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="mobileSidebarBackdrop" class="fixed inset-0 bg-slate-950/60 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity"></div>
+
+  <!-- ======================================================================
+       SIDEBAR NAVIGATION (Dark Navy Theme)
+       ====================================================================== -->
+  <aside id="sidebar" class="fixed lg:static top-0 bottom-0 left-0 z-50 flex flex-col justify-between -translate-x-full lg:translate-x-0 border-r border-slate-800 flex-shrink-0 select-none">
+    <div>
+      <!-- Brand Logo / Header -->
+      <div class="h-16 flex items-center px-4 border-b border-slate-800/80">
+        <div class="sidebar-header-title overflow-hidden whitespace-nowrap">
+          <h1 class="font-extrabold text-xs tracking-wider text-white">EXIMIUS POWER AND ENERGY</h1>
+          <p class="text-[10px] text-slate-400 font-medium tracking-tight mt-0.5">ELECTRICAL INVENTORY</p>
+        </div>
+        <div class="sidebar-collapsed-icon hidden items-center justify-center w-full font-black text-amber-500 text-base tracking-wider">
+          EX
+        </div>
+      </div>
+
+      <!-- Main Navigation Menu (11 Sections) -->
+      <nav class="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)]">
+        <a href="#dashboard" onclick="EximusApp.navigate('dashboard')" data-nav-target="dashboard" class="nav-item nav-active" title="Executive Dashboard">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Dashboard</span>
+        </a>
+
+        <a href="#master-inventory" onclick="EximusApp.navigate('master-inventory')" data-nav-target="master-inventory" class="nav-item" title="Master Inventory">
+          <i data-lucide="database" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Master Inventory</span>
+          <span class="sidebar-badge ml-auto text-[10px] font-mono font-bold bg-blue-900/60 text-blue-300 px-1.5 py-0.5 rounded">247</span>
+        </a>
+
+        <a href="#categories" onclick="EximusApp.navigate('categories')" data-nav-target="categories" class="nav-item" title="Inventory Categories">
+          <i data-lucide="folders" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Categories</span>
+          <span class="sidebar-badge ml-auto text-[10px] font-mono bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">4</span>
+        </a>
+
+        <a href="#issued-items" onclick="EximusApp.navigate('issued-items')" data-nav-target="issued-items" class="nav-item" title="Issued Items">
+          <i data-lucide="arrow-up-right" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Issued Items</span>
+        </a>
+
+        <a href="#permanent-returnable" onclick="EximusApp.navigate('permanent-returnable')" data-nav-target="permanent-returnable" class="nav-item" title="Permanent & Returnable">
+          <i data-lucide="shield-check" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Permanent & Returnable</span>
+        </a>
+
+        <a href="#new-purchases" onclick="EximusApp.navigate('new-purchases')" data-nav-target="new-purchases" class="nav-item" title="New Purchases">
+          <i data-lucide="shopping-cart" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">New Purchases</span>
+        </a>
+
+        <a href="#locations" onclick="EximusApp.navigate('locations')" data-nav-target="locations" class="nav-item" title="Locations">
+          <i data-lucide="map-pin" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Locations</span>
+          <span class="sidebar-badge ml-auto text-[10px] font-mono bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">16</span>
+        </a>
+
+        <a href="#transfers" onclick="EximusApp.navigate('transfers')" data-nav-target="transfers" class="nav-item" title="Warehouses & Stock Transfers">
+          <i data-lucide="building-2" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Warehouses & Transfers</span>
+          <span class="sidebar-badge ml-auto text-[10px] font-mono font-bold bg-blue-900/60 text-blue-300 px-1.5 py-0.5 rounded">5</span>
+        </a>
+
+        <a href="#stock-movements" onclick="EximusApp.navigate('stock-movements')" data-nav-target="stock-movements" class="nav-item" title="Stock Movements Audit">
+          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Stock Movements</span>
+        </a>
+
+        <a href="#reports" onclick="EximusApp.navigate('reports')" data-nav-target="reports" class="nav-item" title="Reports & Analytics">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Reports & Analytics</span>
+        </a>
+
+        <a href="#import-export" onclick="EximusApp.navigate('import-export')" data-nav-target="import-export" class="nav-item" title="Excel Import & Export">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Excel Import / Export</span>
+        </a>
+
+        <a href="#settings" onclick="EximusApp.navigate('settings')" data-nav-target="settings" class="nav-item" title="Settings & Backup">
+          <i data-lucide="settings" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="sidebar-text truncate">Settings & Backup</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Sidebar Footer / User Profile & Collapse Toggle -->
+    <div class="p-3 border-t border-slate-800/80 bg-slate-950/40">
+      <div class="flex items-center justify-between">
+        <div class="sidebar-footer-user flex items-center gap-2.5 overflow-hidden">
+          <div class="w-8 h-8 rounded-full bg-blue-600/30 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
+            D
+          </div>
+          <div class="overflow-hidden whitespace-nowrap">
+            <p class="text-xs font-semibold text-white truncate">Mr. Danushka</p>
+            <p class="text-[10px] text-slate-400 truncate">Senior Site Admin</p>
+          </div>
+        </div>
+        <button id="sidebarToggleBtn" onclick="EximusApp.toggleSidebar()" class="hidden lg:flex p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors" title="Toggle Sidebar">
+          <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ======================================================================
+       MAIN CONTENT WRAPPER
+       ====================================================================== -->
+  <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+
+    <!-- Top Application Header -->
+    <header class="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between z-20 flex-shrink-0 shadow-sm">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <button id="mobileMenuBtn" onclick="EximusApp.toggleSidebar(true)" class="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <div class="flex items-center gap-3.5 sm:gap-4">
+          <img id="appHeaderLogo" 
+               src="assets/images/logo.svg" 
+               data-fallback-idx="0"
+               onerror="handleAppLogoError(this)" 
+               alt="Eximius Power and Energy" 
+               style="height: 48px; width: auto; max-width: 260px;"
+               class="h-12 w-auto object-contain flex-shrink-0 select-none">
+          <h2 id="headerSectionTitle" class="text-base sm:text-lg font-bold text-slate-900 tracking-tight whitespace-nowrap">Executive Dashboard</h2>
+        </div>
+      </div>
+
+      <!-- Header Center / Live Time Indicator -->
+      <div class="header-time-container hidden md:flex items-center gap-2 text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-full">
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+        <span id="headerCurrentDate">Wednesday, Jul 1, 2026</span>
+        <span class="text-slate-300">•</span>
+        <span id="headerCurrentTime" class="font-mono text-slate-700">10:00:00 AM</span>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="flex items-center gap-2 sm:gap-3 header-actions">
+        <!-- Global Search Trigger -->
+        <button id="headerGlobalSearchTrigger" onclick="EximusUtils.openModal('globalSearchModal')" class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 rounded-lg text-xs font-medium transition-colors border border-slate-200">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Search records...</span>
+          <kbd class="hidden sm:inline-block px-1.5 py-0.5 bg-white border border-slate-300 text-[10px] rounded font-mono text-slate-500 shadow-xs">Ctrl K</kbd>
+        </button>
+
+        <!-- Notification Bell -->
+        <button id="headerNotificationBtn" onclick="EximusUtils.openModal('notificationModal')" class="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors" title="Notifications & Alerts">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span id="headerNotificationCount" class="absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-xs hidden">
+            0
+          </span>
+        </button>
+
+        <!-- Quick Add Item Universal Button -->
+        <button onclick="EximusInventory.openAddItemModal()" class="btn-primary text-xs font-semibold py-1.5 px-3 rounded-lg shadow-sm">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Add Item</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Scrollable Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+      <!-- Global Data Import Preloaded Banner -->
+      <div id="importSummaryBanner" class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-4 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-blue-800">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-700/60 flex items-center justify-center flex-shrink-0 text-blue-200">
+            <i data-lucide="database" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-xs uppercase font-extrabold tracking-wider text-blue-300">Live Enterprise Database Loaded</p>
+            <p id="importSummaryText" class="text-xs text-blue-100 mt-0.5 leading-relaxed">
+              Preloaded with <strong>247 master items</strong>, <strong>243 audit records</strong>, and <strong>16 storage locations</strong> from <strong>OFFICE ELECTRICAL INVENTORY (2026.07.01).xlsx</strong>. Zero fictional sample data used.
+            </p>
+          </div>
+        </div>
+        <button onclick="document.getElementById('importSummaryBanner').classList.add('hidden')" class="text-xs text-blue-300 hover:text-white px-2.5 py-1 rounded bg-blue-800/60 hover:bg-blue-800 transition-colors flex-shrink-0">
+          Dismiss
+        </button>
+      </div>
+
+      <!-- ==================================================================
+           SECTION 1: DASHBOARD
+           ================================================================== -->
+      <section id="section-dashboard" class="app-section space-y-6">
+        
+        <!-- 6 Dynamic KPI Cards -->
+        <div class="kpi-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <!-- KPI 1 -->
+          <div class="kpi-card kpi-card-blue">
+            <div class="flex items-center justify-between text-slate-500 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Total SKUs</span>
+              <i data-lucide="package" class="w-4 h-4 text-blue-600"></i>
+            </div>
+            <div id="kpiTotalItems" class="text-2xl font-black text-slate-900">247</div>
+            <p class="text-[11px] text-slate-400 mt-1">Catalogued items</p>
+          </div>
+
+          <!-- KPI 2 -->
+          <div class="kpi-card kpi-card-emerald">
+            <div class="flex items-center justify-between text-slate-500 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Total Stock</span>
+              <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i>
+            </div>
+            <div id="kpiTotalStock" class="text-2xl font-black text-slate-900">0</div>
+            <p class="text-[11px] text-slate-400 mt-1">Aggregated units</p>
+          </div>
+
+          <!-- KPI 3 -->
+          <div class="kpi-card kpi-card-indigo">
+            <div class="flex items-center justify-between text-slate-500 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Available</span>
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-indigo-600"></i>
+            </div>
+            <div id="kpiAvailableItems" class="text-2xl font-black text-slate-900">0</div>
+            <p class="text-[11px] text-slate-400 mt-1">Ready for dispatch</p>
+          </div>
+
+          <!-- KPI 4 -->
+          <div class="kpi-card kpi-card-purple">
+            <div class="flex items-center justify-between text-slate-500 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Issued Stock</span>
+              <i data-lucide="arrow-up-right" class="w-4 h-4 text-purple-600"></i>
+            </div>
+            <div id="kpiIssuedItems" class="text-2xl font-black text-slate-900">0</div>
+            <p class="text-[11px] text-slate-400 mt-1">In field use</p>
+          </div>
+
+          <!-- KPI 5 -->
+          <div class="kpi-card kpi-card-amber">
+            <div class="flex items-center justify-between text-slate-500 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Low Stock</span>
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600"></i>
+            </div>
+            <div id="kpiLowStock" class="text-2xl font-black text-amber-600">0</div>
+            <p class="text-[11px] text-slate-400 mt-1">Below safety limit</p>
+          </div>
+
+          <!-- KPI 6 -->
+          <div class="kpi-card kpi-card-rose">
+            <div class="flex items-center justify-between text-slate-500 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Under Repair</span>
+              <i data-lucide="wrench" class="w-4 h-4 text-rose-600"></i>
+            </div>
+            <div id="kpiUnderRepair" class="text-2xl font-black text-rose-600">0</div>
+            <p class="text-[11px] text-slate-400 mt-1">Defective / Service</p>
+          </div>
+        </div>
+
+        <!-- 4 Chart.js Analytics Visualizations -->
+        <div class="charts-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Chart 1: Category Breakdown -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Category-wise Inventory Distribution</h3>
+                <p class="text-xs text-slate-400">Share of SKUs across Hand Tools, Materials, Power Equip & Switch Gears</p>
+              </div>
+              <span class="p-1.5 text-blue-600 bg-blue-50 rounded-lg"><i data-lucide="pie-chart" class="w-4 h-4"></i></span>
+            </div>
+            <div class="relative h-64 w-full">
+              <canvas id="chartCategoryDistribution"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Top Stock Locations -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Top Storage Locations by Volume</h3>
+                <p class="text-xs text-slate-400">Item densities stored across boxes, drawers, bags and shelves</p>
+              </div>
+              <span class="p-1.5 text-blue-600 bg-blue-50 rounded-lg"><i data-lucide="bar-chart-2" class="w-4 h-4"></i></span>
+            </div>
+            <div class="relative h-64 w-full">
+              <canvas id="chartLocationStock"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Condition Overview -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Item Usability & Condition Ratio</h3>
+                <p class="text-xs text-slate-400">Assessment of stock readiness (NEW, USABLE, USED, UNUSABLE)</p>
+              </div>
+              <span class="p-1.5 text-emerald-600 bg-emerald-50 rounded-lg"><i data-lucide="check-square" class="w-4 h-4"></i></span>
+            </div>
+            <div class="relative h-64 w-full">
+              <canvas id="chartConditionOverview"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 4: Monthly Purchase & Movement Summary -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Monthly Purchase & Movement Activity</h3>
+                <p class="text-xs text-slate-400">Inventory flow, replenishments and loans over time</p>
+              </div>
+              <span class="p-1.5 text-indigo-600 bg-indigo-50 rounded-lg"><i data-lucide="trending-up" class="w-4 h-4"></i></span>
+            </div>
+            <div class="relative h-64 w-full">
+              <canvas id="chartMonthlyActivity"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Widgets Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Widget 1: Recently Added Items (Spans 2 cols) -->
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between">
+            <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Catalogued Master Inventory</h3>
+                <p class="text-xs text-slate-400">Latest active components in the electrical store</p>
+              </div>
+              <button onclick="EximusApp.navigate('master-inventory')" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
+                View All ->
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left enterprise-table">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Item Name</th>
+                    <th>Category</th>
+                    <th>Stock</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="widgetRecentItemsTable">
+                  <!-- Populated by dashboard.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Widget 2: Low Stock Alerts -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-slate-900">Low Stock Alerts</h3>
+                <span class="badge bg-amber-50 text-amber-700 border border-amber-200/80">Needs Attention</span>
+              </div>
+              <p class="text-xs text-slate-400 mb-4">Items requiring immediate procurement</p>
+              <div id="widgetLowStockList" class="space-y-3">
+                <!-- Populated by dashboard.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Widget 3: Pending Returns -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-slate-900">Pending Field Returns</h3>
+                <span class="badge bg-blue-50 text-blue-700 border border-blue-200/80">Loans</span>
+              </div>
+              <p class="text-xs text-slate-400 mb-4">Equipment issued to employees</p>
+              <div id="widgetPendingReturnsList" class="space-y-3">
+                <!-- Populated by dashboard.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Widget 4: Recent Activities (Spans 2 cols) -->
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">Recent Stock Transactions & Audit Feed</h3>
+                  <p class="text-xs text-slate-400">Real-time log of additions, loans, returns, and adjustments</p>
+                </div>
+                <button onclick="EximusApp.navigate('stock-movements')" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
+                  Full Ledger ->
+                </button>
+              </div>
+              <div id="widgetRecentActivityStream" class="divide-y divide-slate-100">
+                <!-- Populated by dashboard.js -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ==================================================================
+           SECTION 2: MASTER INVENTORY
+           ================================================================== -->
+      <section id="section-master-inventory" class="app-section space-y-4 hidden">
+        <!-- Controls & Filter Toolbar -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+            <!-- Search Input -->
+            <div class="relative flex-1 max-w-lg">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input id="inventorySearchInput" type="text" placeholder="Search by item name, code, brand, model, specs, location..." class="form-input pl-10 pr-4 py-2 text-xs">
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="EximusInventory.openAddItemModal()" class="btn-primary text-xs font-semibold py-2 px-3.5">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                Add New Item
+              </button>
+              <button onclick="EximusExcel.exportMasterSheetOnly()" class="btn-secondary text-xs font-medium py-2 px-3">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
+                Export Excel
+              </button>
+              <button onclick="EximusInventory.exportFilteredCSV()" class="btn-secondary text-xs font-medium py-2 px-3">
+                <i data-lucide="download" class="w-4 h-4 text-slate-600"></i>
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Multi-Dropdown Filters Row -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-2 border-t border-slate-100">
+            <!-- Category Filter -->
+            <select id="inventoryCategoryFilter" class="form-select text-xs">
+              <option value="">All Categories</option>
+              <option value="HAND TOOLS">HAND TOOLS</option>
+              <option value="MATERIALS">MATERIALS</option>
+              <option value="POWER EQUIPMENT">POWER EQUIPMENT</option>
+              <option value="SWITCH GEARS">SWITCH GEARS</option>
+            </select>
+
+            <!-- Location Filter -->
+            <select id="inventoryLocationFilter" class="form-select text-xs">
+              <option value="">All Locations</option>
+            </select>
+
+            <!-- Warehouse Filter -->
+            <select id="inventoryWarehouseFilter" class="form-select text-xs">
+              <option value="">All 5 Warehouses</option>
+            </select>
+
+            <!-- Condition Filter -->
+            <select id="inventoryConditionFilter" class="form-select text-xs">
+              <option value="">All Conditions</option>
+              <option value="NEW">NEW</option>
+              <option value="USABLE">USABLE</option>
+              <option value="USED">USED</option>
+              <option value="UNUSABLE">UNUSABLE</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select id="inventoryStatusFilter" class="form-select text-xs">
+              <option value="">All Statuses</option>
+              <option value="AVAILABLE">AVAILABLE</option>
+              <option value="IN USE">IN USE</option>
+              <option value="UNDER REPAIR">UNDER REPAIR</option>
+              <option value="AWAITING REPAIR">AWAITING REPAIR</option>
+              <option value="OUT_OF_STOCK">OUT OF STOCK</option>
+            </select>
+
+            <!-- Stock Level Filter -->
+            <select id="inventoryStockLevelFilter" class="form-select text-xs">
+              <option value="">All Stock Levels</option>
+              <option value="in_stock">In Stock (> 0)</option>
+              <option value="low_stock">Low Stock (≤ Threshold)</option>
+              <option value="out_of_stock">Out of Stock (= 0)</option>
+            </select>
+
+            <!-- Reset Filters -->
+            <button id="inventoryClearFiltersBtn" onclick="EximusInventory.resetFilters()" class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              Reset Filters
+            </button>
+          </div>
+        </div>
+
+        <!-- Master Inventory Table Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50/50">
+            <span id="inventoryResultCount" class="text-xs text-slate-500">
+              Showing <span class="font-bold text-slate-900">247</span> master records
+            </span>
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+              <span>Show per page:</span>
+              <select id="inventoryPageSize" class="form-select py-1 px-2 text-xs font-semibold w-20">
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">All</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="enterprise-table-container overflow-x-auto max-h-[68vh]">
+            <table class="w-full text-left enterprise-table">
+              <thead>
+                <tr>
+                  <th onclick="EximusInventory.sort('category_no')" class="cursor-pointer select-none text-center w-12 hover:text-blue-600">No ↕</th>
+                  <th onclick="EximusInventory.sort('item_code')" class="cursor-pointer select-none hover:text-blue-600">Code ↕</th>
+                  <th onclick="EximusInventory.sort('item_name')" class="cursor-pointer select-none hover:text-blue-600 min-w-[200px]">Item Name ↕</th>
+                  <th onclick="EximusInventory.sort('category')" class="cursor-pointer select-none hover:text-blue-600">Category ↕</th>
+                  <th>Description</th>
+                  <th>Brand</th>
+                  <th>Model</th>
+                  <th>Technical Specs</th>
+                  <th onclick="EximusInventory.sort('location')" class="cursor-pointer select-none hover:text-blue-600 min-w-[160px]">Location ↕</th>
+                  <th class="text-center">Unit</th>
+                  <th onclick="EximusInventory.sort('quantity')" class="cursor-pointer select-none text-right hover:text-blue-600">Quantity ↕</th>
+                  <th onclick="EximusInventory.sort('condition')" class="cursor-pointer select-none text-center hover:text-blue-600">Condition ↕</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-center min-w-[130px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="masterInventoryTableBody">
+                <!-- Dynamically populated by inventory.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="p-4 border-t border-slate-200 flex items-center justify-between">
+            <span class="text-xs text-slate-500">Page Navigation</span>
+            <div id="inventoryPaginationControls"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 3: INVENTORY CATEGORIES
+           ================================================================== -->
+      <section id="section-categories" class="app-section space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Inventory Classification Categories</h3>
+            <p class="text-xs text-slate-400">All 4 verified company electrical categories from Master Sheet</p>
+          </div>
+          <button onclick="EximusCategories.openAddCategoryModal()" class="btn-primary text-xs font-semibold py-2 px-3.5">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Category
+          </button>
+        </div>
+
+        <div id="categoryCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Populated by categories.js -->
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 4: ISSUED ITEMS (Worksheet 03)
+           ================================================================== -->
+      <section id="section-issued-items" class="app-section space-y-4 hidden">
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="relative flex-1 max-w-md">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input id="issuedSearchInput" type="text" placeholder="Search issued items or recipient employee name..." class="form-input pl-10 pr-4 py-2 text-xs">
+            </div>
+            <select id="issuedStatusFilter" class="form-select text-xs w-40">
+              <option value="">All Statuses</option>
+              <option value="ISSUED">Currently In Use</option>
+              <option value="RETURNED">Returned</option>
+            </select>
+          </div>
+          <button onclick="EximusTransactions.openIssueModal()" class="btn-primary text-xs font-semibold py-2 px-4">
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            Issue Item to Employee
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left enterprise-table">
+              <thead>
+                <tr>
+                  <th>Date Issued</th>
+                  <th>Issued To</th>
+                  <th>Item Name</th>
+                  <th class="text-center">Quantity</th>
+                  <th class="text-center">Returned Date</th>
+                  <th class="text-center">Returned Qty</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="issuedItemsTableBody">
+                <!-- Populated by transactions.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 5: PERMANENT & RETURNABLE (Worksheet 04)
+           ================================================================== -->
+      <section id="section-permanent-returnable" class="app-section space-y-4 hidden">
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="relative flex-1 max-w-md">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input id="permSearchInput" type="text" placeholder="Search permanent issue records or recipient..." class="form-input pl-10 pr-4 py-2 text-xs">
+            </div>
+            <select id="permTypeFilter" class="form-select text-xs w-44">
+              <option value="">All Types</option>
+              <option value="PERMANENT">Permanent Issue</option>
+              <option value="RETURNABLE">Returnable</option>
+            </select>
+          </div>
+          <button onclick="EximusTransactions.openPermanentIssueModal()" class="btn-primary text-xs font-semibold py-2 px-4">
+            <i data-lucide="shield" class="w-4 h-4"></i>
+            New Permanent Assignment
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left enterprise-table">
+              <thead>
+                <tr>
+                  <th>Date Issued</th>
+                  <th>Assigned To</th>
+                  <th>Item Name</th>
+                  <th class="text-center">Quantity</th>
+                  <th class="text-center">Assignment Type</th>
+                  <th class="text-center">Description</th>
+                  <th class="text-center">Return Status</th>
+                </tr>
+              </thead>
+              <tbody id="permanentItemsTableBody">
+                <!-- Populated by transactions.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 6: NEW PURCHASES (Worksheet 05)
+           ================================================================== -->
+      <section id="section-new-purchases" class="app-section space-y-4 hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-400 uppercase font-semibold">Total Procurement Spend</p>
+              <p id="purchaseTotalSpend" class="text-xl font-black text-slate-900 mt-0.5">LKR 0.00</p>
+            </div>
+            <i data-lucide="credit-card" class="w-8 h-8 text-blue-600 bg-blue-50 p-1.5 rounded-xl"></i>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-400 uppercase font-semibold">Stock Inflow Volume</p>
+              <p id="purchaseTotalItemsCount" class="text-xl font-black text-slate-900 mt-0.5">0 units</p>
+            </div>
+            <i data-lucide="package-plus" class="w-8 h-8 text-emerald-600 bg-emerald-50 p-1.5 rounded-xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div class="relative flex-1 max-w-md">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input id="purchaseSearchInput" type="text" placeholder="Search purchase records by item or supplier..." class="form-input pl-10 pr-4 py-2 text-xs">
+          </div>
+          <button onclick="EximusTransactions.openPurchaseModal()" class="btn-primary text-xs font-semibold py-2 px-4">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            Record New Purchase
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left enterprise-table">
+              <thead>
+                <tr>
+                  <th>Purchase Date</th>
+                  <th>Item Name</th>
+                  <th class="text-center">Quantity</th>
+                  <th>Supplier / Vendor</th>
+                  <th>Storage Location</th>
+                  <th class="text-right">Total Amount</th>
+                  <th class="text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="purchasesTableBody">
+                <!-- Populated by transactions.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 7: LOCATIONS (Worksheet 06)
+           ================================================================== -->
+      <section id="section-locations" class="app-section space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Company Storage Locations</h3>
+            <p class="text-xs text-slate-400">All 16 verified container & box locations with photo support</p>
+          </div>
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="relative flex-1 sm:w-64">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input id="locationSearchInput" type="text" placeholder="Search locations..." class="form-input pl-9 pr-3 py-1.5 text-xs">
+            </div>
+            <button onclick="EximusLocations.openAddLocationModal()" class="btn-primary text-xs font-semibold py-2 px-3.5 flex-shrink-0">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              Add Location
+            </button>
+          </div>
+        </div>
+
+        <!-- Locations Cards Grid -->
+        <div id="locationsGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <!-- Populated by locations.js -->
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 8: STOCK MOVEMENTS AUDIT LEDGER
+           ================================================================== -->
+      <section id="section-stock-movements" class="app-section space-y-4 hidden">
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="relative flex-1 max-w-md">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input id="movementSearchInput" type="text" placeholder="Search transactions by item or user..." class="form-input pl-10 pr-4 py-2 text-xs" oninput="EximusApp.loadMovements()">
+            </div>
+            <select id="movementTypeFilter" class="form-select text-xs w-48" onchange="EximusApp.loadMovements()">
+              <option value="">All Movement Types</option>
+              <option value="INITIAL_IMPORT">Initial Import</option>
+              <option value="PURCHASE">Purchase</option>
+              <option value="ISSUE">Issue Item</option>
+              <option value="RETURN">Return Item</option>
+              <option value="PERMANENT_ISSUE">Permanent Issue</option>
+              <option value="WAREHOUSE_TRANSFER">Warehouse Transfer</option>
+              <option value="ADJUSTMENT">Stock Adjustment</option>
+            </select>
+          </div>
+          <button onclick="EximusApp.loadMovements()" class="btn-secondary text-xs font-medium py-2 px-3">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            Refresh Audit
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left enterprise-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Item Name</th>
+                  <th>Movement Type</th>
+                  <th class="text-center">Qty Change</th>
+                  <th class="text-center">Balance After</th>
+                  <th>Reason / Notes</th>
+                  <th>User</th>
+                </tr>
+              </thead>
+              <tbody id="stockMovementsTableBody">
+                <!-- Populated by app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION: WAREHOUSES & INTER-WAREHOUSE TRANSFERS
+           ================================================================== -->
+      <section id="section-transfers" class="app-section space-y-5 hidden">
+        <!-- Transfer KPI Metrics -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="kpi-card p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-500">Total Transfers</span>
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div id="kpiTotalTransfers" class="text-2xl font-black text-slate-900 mt-2 font-mono">0</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Dispatches between stores</p>
+          </div>
+
+          <div class="kpi-card p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-500">Active Warehouses</span>
+              <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="building-2" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div id="kpiTotalWarehouses" class="text-2xl font-black text-emerald-600 mt-2 font-mono">5</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Configured depots & sites</p>
+          </div>
+
+          <div class="kpi-card p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-500">Units Transferred</span>
+              <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                <i data-lucide="package-check" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div id="kpiTotalUnitsTransferred" class="text-2xl font-black text-purple-600 mt-2 font-mono">0</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Total components moved</p>
+          </div>
+
+          <div class="kpi-card p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-500">Latest Transfer</span>
+              <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                <i data-lucide="calendar" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div id="kpiLatestTransferDate" class="text-sm font-bold text-slate-800 mt-3 truncate font-mono">-</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Most recent movement</p>
+          </div>
+        </div>
+
+        <!-- Section Navigation Toolbar -->
+        <div class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-1 border-b sm:border-b-0 border-slate-100">
+            <button id="tabBtnTransfers" onclick="window.EximusTransfers.switchTab('transfers')" class="px-4 py-2 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 bg-white transition flex items-center gap-2">
+              <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+              Transfers Ledger
+            </button>
+            <button id="tabBtnWarehouses" onclick="window.EximusTransfers.switchTab('warehouses')" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 border-b-2 border-transparent transition flex items-center gap-2">
+              <i data-lucide="building-2" class="w-4 h-4"></i>
+              Manage 5 Warehouses
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btnNewTransfer" onclick="window.EximusTransfers.openNewTransferModal()" class="btn-primary text-xs font-semibold py-2 px-3.5 flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              + New Stock Transfer
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW 1: TRANSFERS LEDGER TABLE -->
+        <div id="transfersListView" class="space-y-4">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+              <div class="relative flex-1">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input id="transferSearchInput" type="text" placeholder="Search by transfer #, item, vehicle, officer..." class="form-input pl-9 pr-4 py-2 text-xs">
+              </div>
+              <select id="transferFilterFrom" class="form-select text-xs sm:w-48">
+                <option value="">All Source Warehouses</option>
+              </select>
+              <select id="transferFilterTo" class="form-select text-xs sm:w-48">
+                <option value="">All Destination Warehouses</option>
+              </select>
+            </div>
+            <div class="flex items-center justify-between sm:justify-end gap-2">
+              <span id="transfersCountBadge" class="text-xs font-mono font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                0 Transfers
+              </span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left enterprise-table">
+                <thead>
+                  <tr>
+                    <th>Transfer No</th>
+                    <th>Date</th>
+                    <th>Source Warehouse</th>
+                    <th>Destination</th>
+                    <th>Item Transferred</th>
+                    <th class="text-right">Quantity</th>
+                    <th>Logistics / Driver</th>
+                    <th class="text-center">Waybill</th>
+                  </tr>
+                </thead>
+                <tbody id="transfersTableBody">
+                  <!-- Populated by transfers.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: MANAGE 5 WAREHOUSES -->
+        <div id="warehousesListView" class="space-y-4 hidden">
+          <div class="p-4 bg-blue-50/80 border border-blue-200 rounded-2xl flex items-start sm:items-center justify-between gap-3 text-xs text-blue-900">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center flex-shrink-0">
+                <i data-lucide="info" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <p class="font-bold">5 Company Warehouses & Field Stores</p>
+                <p class="text-blue-700">You can customize names, codes, facility locations, and custodians for all 5 warehouses below. Stock levels update automatically when items are transferred.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5 Warehouse Cards Grid -->
+          <div id="warehouseCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Populated by transfers.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 9: REPORTS & ANALYTICS
+           ================================================================== -->
+      <section id="section-reports" class="app-section space-y-4 hidden">
+        <!-- Report Controls Toolbar -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
+            <select id="reportTypeSelect" class="form-select text-xs font-semibold text-blue-900 bg-blue-50/50">
+              <option value="complete_inventory">1. Complete Inventory Report</option>
+              <option value="category_breakdown">2. Category-wise Breakdown</option>
+              <option value="location_breakdown">3. Location-wise Breakdown</option>
+              <option value="available_stock">4. Available In-Stock Report</option>
+              <option value="issued_items">5. Active Issued Items</option>
+              <option value="return_history">6. Return History Report</option>
+              <option value="permanent_issues">7. Permanent Issues Report</option>
+              <option value="purchase_history">8. Purchase History Report</option>
+              <option value="low_stock">9. Low Stock & Reorder Alert</option>
+              <option value="condition_report">10. Condition & Usability Report</option>
+            </select>
+
+            <select id="reportCategoryFilter" class="form-select text-xs">
+              <option value="">All Categories</option>
+              <option value="HAND TOOLS">HAND TOOLS</option>
+              <option value="MATERIALS">MATERIALS</option>
+              <option value="POWER EQUIPMENT">POWER EQUIPMENT</option>
+              <option value="SWITCH GEARS">SWITCH GEARS</option>
+            </select>
+
+            <select id="reportLocationFilter" class="form-select text-xs">
+              <option value="">All Locations</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="reportRefreshBtn" onclick="EximusReports.generateReport()" class="btn-secondary text-xs font-medium py-2 px-3">
+              <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+              Refresh
+            </button>
+            <button id="reportPrintBtn" onclick="EximusReports.printReport()" class="btn-secondary text-xs font-medium py-2 px-3">
+              <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-700"></i>
+              Print / PDF
+            </button>
+            <button id="reportExportExcelBtn" onclick="EximusReports.exportExcel()" class="btn-primary text-xs font-semibold py-2 px-3.5">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+              Excel Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Report Sheet View Container -->
+        <div id="printableReportCard" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-200 gap-2">
+            <div>
+              <span class="text-[10px] font-bold tracking-wider text-blue-600 uppercase">EXIMIUS POWER AND ENERGY &bull; OFFICIAL AUDIT REPORT</span>
+              <h3 id="reportViewTitle" class="text-xl font-black text-slate-900 mt-0.5">Master Inventory Report</h3>
+              <p id="reportViewDesc" class="text-xs text-slate-500 mt-1">Official inventory audit document.</p>
+            </div>
+            <span id="reportGeneratedDate" class="text-xs text-slate-400 font-mono">Generated: 2026-07-01</span>
+          </div>
+
+          <!-- Summary Badges Grid -->
+          <div id="reportSummaryStatsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+
+          <!-- Report Data Table -->
+          <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <table class="w-full text-left enterprise-table">
+              <thead id="reportTableHead"></thead>
+              <tbody id="reportTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 10: DATA IMPORT & EXPORT
+           ================================================================== -->
+      <section id="section-import-export" class="app-section space-y-6 hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Card A: Excel Import Engine -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-5">
+            <div>
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-slate-900">Import Excel Workbook (.xlsx)</h3>
+                  <p class="text-xs text-slate-400">Import OFFICE ELECTRICAL INVENTORY (2026.07.01).xlsx or updated spreadsheets</p>
+                </div>
+              </div>
+
+              <!-- Drag & Drop Zone -->
+              <div id="excelDropZone" class="mt-4 border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer">
+                <i data-lucide="file-spreadsheet" class="w-12 h-12 text-slate-400 mx-auto mb-3"></i>
+                <p class="text-sm font-semibold text-slate-700">Drag & drop your Excel file here</p>
+                <p class="text-xs text-slate-400 mt-1">Supports multi-sheet workbooks (.xlsx, .xls)</p>
+                <label class="mt-4 inline-block btn-primary text-xs font-semibold py-2 px-4 cursor-pointer">
+                  Browse File
+                  <input id="excelFileInput" type="file" accept=".xlsx, .xls" class="hidden">
+                </label>
+              </div>
+
+              <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1">
+                <p class="font-bold text-slate-800">Supported Sheet Names:</p>
+                <p class="font-mono text-[11px] text-slate-500">2026.07.01, Master Sheet, Issued Items, PermanetReturnable, New Purchases, Location</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card B: Multi-Sheet Full Excel Export Engine -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-5">
+            <div>
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <i data-lucide="download" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-slate-900">Export Excel Workbooks</h3>
+                  <p class="text-xs text-slate-400">Generate formatted spreadsheets identical to original workbook structure</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 mt-4">
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Complete 6-Worksheet Excel Workbook</h4>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Exports all 6 sheets: 2026.07.01, Master Sheet, Issued Items, PermanetReturnable, New Purchases, Location</p>
+                  </div>
+                  <button id="exportFullWorkbookBtn" onclick="EximusExcel.exportCompleteWorkbook()" class="btn-primary text-xs font-semibold py-2 px-3.5 flex-shrink-0">
+                    Export All Sheets
+                  </button>
+                </div>
+
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Master Inventory Spreadsheet Only</h4>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Exports all 247 master components with stock, specs, and storage locations</p>
+                  </div>
+                  <button id="exportMasterSheetOnlyBtn" onclick="EximusExcel.exportMasterSheetOnly()" class="btn-secondary text-xs font-medium py-2 px-3 flex-shrink-0">
+                    Export Master
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           SECTION 11: SETTINGS & BACKUP ENGINE
+           ================================================================== -->
+      <section id="section-settings" class="app-section space-y-6 hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Card A: Local IndexedDB Architecture & Backup Notice -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <i data-lucide="hard-drive" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Local Browser Storage Architecture</h3>
+                <p class="text-xs text-slate-400">IndexedDB local database with zero external server dependencies</p>
+              </div>
+            </div>
+
+            <div class="p-4 bg-amber-50/70 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed">
+              <strong>Notice Regarding Multi-Workstation Synchronization:</strong><br>
+              This application operates as a high-performance frontend client using the browser's persistent <strong>IndexedDB</strong> engine. All inventory records, location photographs, and audit logs are securely stored inside your local browser storage. It does not synchronize automatically to other employee computers. Use the <strong>JSON Backup & Restore</strong> buttons below to transfer or backup data across devices.
+            </div>
+
+            <div class="space-y-3 pt-2">
+              <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900">Download Full JSON Backup Snapshot</h4>
+                  <p class="text-[11px] text-slate-500">Backs up all master items, loans, purchases, movements, and photos</p>
+                </div>
+                <button id="settingsExportJsonBtn" onclick="EximusApp.exportJsonBackup()" class="btn-primary text-xs font-semibold py-1.5 px-3">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  Save JSON
+                </button>
+              </div>
+
+              <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900">Restore Database from JSON Snapshot</h4>
+                  <p class="text-[11px] text-slate-500">Select a previously exported .json file to restore</p>
+                </div>
+                <label class="btn-secondary text-xs font-medium py-1.5 px-3 cursor-pointer">
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                  Restore JSON
+                  <input id="settingsRestoreJsonInput" type="file" accept=".json" onchange="EximusApp.handleRestoreJson(event)" class="hidden">
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card B: Factory Re-seed & System Metadata -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <i data-lucide="shield" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900">System Integrity & Factory Baseline</h3>
+                <p class="text-xs text-slate-400">Excel source workbook verification and reset controls</p>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Source Workbook:</span>
+                <span class="font-bold text-slate-800">OFFICE ELECTRICAL INVENTORY (2026.07.01).xlsx</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Total Preloaded Items:</span>
+                <span class="font-bold text-slate-800">247 Master Records</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Locations Indexed:</span>
+                <span class="font-bold text-slate-800">16 Containers / Boxes</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Storage Engine:</span>
+                <span class="font-mono font-bold text-blue-600">IndexedDB (EximusInventoryDB v2)</span>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
+              <button id="settingsFactoryResetBtn" onclick="EximusApp.triggerFactoryReset()" class="w-full py-2.5 px-4 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors flex items-center justify-center gap-2">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                Factory Reset to Original Excel Workbook Baseline
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ======================================================================
+       MODAL WINDOWS & DIALOGS
+       ====================================================================== -->
+
+  <!-- 1. Add / Edit Master Item Modal -->
+  <div id="itemModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
+        <h3 id="itemModalTitle" class="text-base font-bold text-slate-900">Add New Inventory Item</h3>
+        <button onclick="EximusUtils.closeModal('itemModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="itemForm" onsubmit="EximusInventory.handleSaveItem(event)" class="space-y-4">
+        <input type="hidden" id="itemFormId">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Item Name *</label>
+            <input id="itemFormName" type="text" required class="form-input text-xs" placeholder="e.g. Screw Nails, MC4 Connector">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Category *</label>
+            <select id="itemFormCategory" required class="form-select text-xs">
+              <option value="MATERIALS">MATERIALS</option>
+              <option value="HAND TOOLS">HAND TOOLS</option>
+              <option value="POWER EQUIPMENT">POWER EQUIPMENT</option>
+              <option value="SWITCH GEARS">SWITCH GEARS</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Item Code</label>
+            <input id="itemFormCode" type="text" class="form-input text-xs font-mono" placeholder="ELE-00A">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Stock Quantity *</label>
+            <input id="itemFormQuantity" type="number" min="0" required class="form-input text-xs font-bold" value="1">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Unit of Measure *</label>
+            <input id="itemFormUnit" type="text" required class="form-input text-xs" placeholder="Pcs, Nos, Set, Roll, Pair, m">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Storage Location *</label>
+            <select id="itemFormLocation" required class="form-select text-xs"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Condition *</label>
+            <select id="itemFormCondition" required class="form-select text-xs">
+              <option value="NEW">NEW</option>
+              <option value="USABLE">USABLE</option>
+              <option value="USED">USED</option>
+              <option value="UNUSABLE">UNUSABLE</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Brand Name</label>
+            <input id="itemFormBrand" type="text" class="form-input text-xs" placeholder="e.g. Bosch, Makita, ABB">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Model Number</label>
+            <input id="itemFormModel" type="text" class="form-input text-xs" placeholder="e.g. SG6RS, HT107E">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Min. Alert Threshold</label>
+            <input id="itemFormMinThreshold" type="number" min="0" class="form-input text-xs" value="3">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Technical Specs</label>
+            <input id="itemFormSpecs" type="text" class="form-input text-xs" placeholder="e.g. 6 inch, 40A 220V, 10mm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Operational Status</label>
+            <select id="itemFormStatus" class="form-select text-xs">
+              <option value="AVAILABLE">AVAILABLE</option>
+              <option value="IN USE">IN USE</option>
+              <option value="UNDER REPAIR">UNDER REPAIR</option>
+              <option value="AWAITING REPAIR">AWAITING REPAIR</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Description / Notes</label>
+          <textarea id="itemFormDescription" rows="2" class="form-textarea text-xs" placeholder="Original description, size, or notes..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Remarks</label>
+          <input id="itemFormRemarks" type="text" class="form-input text-xs" placeholder="Internal remarks...">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-4 border-t border-slate-200">
+          <button type="button" onclick="EximusUtils.closeModal('itemModal')" class="btn-secondary text-xs">Cancel</button>
+          <button type="submit" class="btn-primary text-xs">Save Item Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Item Full Details Modal -->
+  <div id="itemDetailsModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div id="itemDetailsModalContent">
+        <!-- Rendered by inventory.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Quick Stock Adjustment Modal -->
+  <div id="quickStockModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-md w-full p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <h3 class="text-sm font-bold text-slate-900">Quick Stock Adjustment</h3>
+        <button onclick="EximusUtils.closeModal('quickStockModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <form onsubmit="EximusInventory.handleQuickStockAdjustment(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="quickStockItemId">
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <p class="text-slate-500">Item:</p>
+          <p id="quickStockItemName" class="font-bold text-slate-900 text-sm mt-0.5">-</p>
+          <p class="text-slate-500 mt-2">Current Balance:</p>
+          <p id="quickStockCurrentQty" class="font-bold text-blue-600 text-base mt-0.5">-</p>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Adjustment Quantity (+ to Add, - to Deduct) *</label>
+          <input id="quickStockDelta" type="number" required class="form-input font-bold text-sm" placeholder="e.g. +5 or -2">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Adjustment Reason *</label>
+          <select id="quickStockReason" required class="form-select">
+            <option value="STOCK_COUNT">Routine Physical Count Adjustment</option>
+            <option value="RESTOCK">Supplier Restock / Purchase</option>
+            <option value="DAMAGED">Damaged / Defective Loss</option>
+            <option value="FIELD_DISPATCH">Unlogged Field Dispatch</option>
+            <option value="SCRAPPED">Scrapped / Retired Item</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Audit Notes</label>
+          <input id="quickStockNotes" type="text" class="form-input" placeholder="e.g. Physical stock take verified by store admin">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="EximusUtils.closeModal('quickStockModal')" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Apply Adjustment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Issue Item Modal -->
+  <div id="issueItemModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-lg w-full p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <h3 class="text-base font-bold text-slate-900">Issue Item to Employee</h3>
+        <button onclick="EximusUtils.closeModal('issueItemModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <form id="issueItemForm" onsubmit="EximusTransactions.handleIssueItem(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Select Item from Master Inventory *</label>
+          <select id="issueFormItemId" required class="form-select font-medium"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Recipient Employee Name *</label>
+            <input id="issueFormIssuedTo" type="text" required class="form-input" placeholder="e.g. Danushka, Site Team">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Quantity to Issue *</label>
+            <input id="issueFormQuantity" type="number" min="1" required class="form-input font-bold" value="1">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Issue Date *</label>
+            <input id="issueFormDate" type="date" required class="form-input">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Expected Return Date</label>
+            <input id="issueFormExpectedReturn" type="date" class="form-input">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Purpose / Project Description</label>
+          <textarea id="issueFormDescription" rows="2" class="form-textarea" placeholder="Site assignment, project code, or purpose..."></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="EximusUtils.closeModal('issueItemModal')" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Confirm Issue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Process Return Modal -->
+  <div id="returnItemModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-md w-full p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <h3 class="text-sm font-bold text-slate-900">Process Item Return</h3>
+        <button onclick="EximusUtils.closeModal('returnItemModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <form onsubmit="EximusTransactions.handleProcessReturn(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="returnModalIssueId">
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+          <p class="text-slate-500">Item: <strong id="returnModalItemName" class="text-slate-900">-</strong></p>
+          <p class="text-slate-500">Issued To: <strong id="returnModalIssuedTo" class="text-slate-900">-</strong></p>
+          <p class="text-slate-500">Total Issued: <span id="returnModalIssuedQty" class="font-bold text-blue-600">-</span></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Returned Quantity *</label>
+            <input id="returnModalQuantity" type="number" min="1" required class="form-input font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Return Date *</label>
+            <input id="returnModalDate" type="date" required class="form-input">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Returned Condition Check *</label>
+          <select id="returnModalCondition" required class="form-select">
+            <option value="USABLE">USABLE - Ready for Reissue</option>
+            <option value="NEW">NEW - Unused Condition</option>
+            <option value="USED">USED - Normal Wear</option>
+            <option value="UNUSABLE">UNUSABLE / DAMAGED - Send to Repair</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Return Notes / Comments</label>
+          <input id="returnModalNotes" type="text" class="form-input" placeholder="e.g. Returned after completing solar array wiring">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="EximusUtils.closeModal('returnItemModal')" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Process Return</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Permanent Issue Modal -->
+  <div id="permanentIssueModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-lg w-full p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <h3 class="text-base font-bold text-slate-900">Permanent Item Assignment</h3>
+        <button onclick="EximusUtils.closeModal('permanentIssueModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <form id="permIssueForm" onsubmit="EximusTransactions.handlePermanentIssue(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Select Item to Assign *</label>
+          <select id="permFormItemId" required class="form-select font-medium"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Recipient Name *</label>
+            <input id="permFormRecipient" type="text" required class="form-input" placeholder="e.g. Mr. Danushka">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Quantity *</label>
+            <input id="permFormQuantity" type="number" min="1" required class="form-input font-bold" value="1">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Assignment Date *</label>
+            <input id="permFormDate" type="date" required class="form-input">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Assignment Type *</label>
+            <select id="permFormIssueType" required class="form-select">
+              <option value="PERMANENT">PERMANENT ISSUE (No Return Required)</option>
+              <option value="RETURNABLE">RETURNABLE (Long-term Loan)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Authorization Remarks</label>
+          <input id="permFormNotes" type="text" class="form-input" placeholder="e.g. Authorized permanent safety kit assignment">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="EximusUtils.closeModal('permanentIssueModal')" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Confirm Assignment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. New Purchase Modal -->
+  <div id="newPurchaseModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-lg w-full p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <h3 class="text-base font-bold text-slate-900">Record New Purchase</h3>
+        <button onclick="EximusUtils.closeModal('newPurchaseModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <form id="newPurchaseForm" onsubmit="EximusTransactions.handleSavePurchase(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Link to Master Item (or Leave Empty for New)</label>
+          <select id="purchaseFormItemId" class="form-select"></select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Custom Item Name (if not in master)</label>
+          <input id="purchaseFormCustomName" type="text" class="form-input" placeholder="Leave empty if existing item was chosen above">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Purchase Date *</label>
+            <input id="purchaseFormDate" type="date" required class="form-input">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Quantity *</label>
+            <input id="purchaseFormQuantity" type="number" min="1" required class="form-input font-bold" value="1">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Unit Price (LKR)</label>
+            <input id="purchaseFormUnitPrice" type="number" step="0.01" min="0" class="form-input" placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Supplier / Vendor</label>
+            <input id="purchaseFormSupplier" type="text" class="form-input" placeholder="e.g. Standard Electricals">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Storage Location</label>
+            <input id="purchaseFormLocation" type="text" class="form-input" placeholder="e.g. PAPYRA White Box">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Purchase Description</label>
+          <input id="purchaseFormDescription" type="text" class="form-input" placeholder="Invoice or procurement details">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="EximusUtils.closeModal('newPurchaseModal')" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Record Purchase & Add Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. Add / Edit Location Modal -->
+  <div id="locationModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-md w-full p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <h3 id="locModalTitle" class="text-sm font-bold text-slate-900">Add Storage Location</h3>
+        <button onclick="EximusUtils.closeModal('locationModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <form id="locationForm" onsubmit="EximusLocations.handleSaveLocation(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="locFormId">
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Location Name *</label>
+          <input id="locFormName" type="text" required class="form-input font-bold" placeholder="e.g. Benz Bag, 1st Drawer">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Shelf / Sub-location</label>
+            <input id="locFormSubLocation" type="text" class="form-input" placeholder="e.g. 2nd shelf">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Storage Type</label>
+            <select id="locFormType" class="form-select">
+              <option value="Storage Box">Storage Box</option>
+              <option value="Tool Bag">Tool Bag</option>
+              <option value="Toolbox">Toolbox</option>
+              <option value="Drawer Storage">Drawer</option>
+              <option value="Cupboard Storage">Cupboard</option>
+              <option value="Floor Storage">Floor Storage</option>
+              <option value="Open Rack">Open Rack</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Description</label>
+          <textarea id="locFormDescription" rows="2" class="form-textarea" placeholder="Physical description of box or shelf..."></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="EximusUtils.closeModal('locationModal')" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Save Location</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 9. Location Stored Items Modal -->
+  <div id="locationDetailModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-2xl w-full p-6 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <h3 id="locationDetailModalTitle" class="text-base font-bold text-slate-900">Stored Items</h3>
+        <button onclick="EximusUtils.closeModal('locationDetailModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="locationDetailModalContent"></div>
+    </div>
+  </div>
+
+  <!-- 10. Category Detail Modal -->
+  <div id="categoryDetailModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-2xl w-full p-6 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <h3 id="categoryDetailModalTitle" class="text-base font-bold text-slate-900">Category Items</h3>
+        <button onclick="EximusUtils.closeModal('categoryDetailModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="categoryDetailModalContent"></div>
+    </div>
+  </div>
+
+  <!-- 11. Add Category Modal -->
+  <div id="addCategoryModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-md w-full p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <h3 class="text-sm font-bold text-slate-900">Create New Category</h3>
+        <button onclick="EximusUtils.closeModal('addCategoryModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <form id="addCategoryForm" onsubmit="EximusCategories.handleSaveCategory(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Category Name *</label>
+          <input id="catFormName" type="text" required class="form-input font-bold uppercase" placeholder="e.g. SOLAR MODULES">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Category Code *</label>
+            <input id="catFormCode" type="text" required class="form-input font-mono font-bold uppercase" placeholder="e.g. SM">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Accent Color</label>
+            <input id="catFormColor" type="color" class="w-full h-8 rounded border border-slate-200 cursor-pointer" value="#2563eb">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Category Icon</label>
+          <select id="catFormIcon" class="form-select">
+            <option value="package">Package</option>
+            <option value="wrench">Wrench</option>
+            <option value="zap">Zap / Power</option>
+            <option value="cpu">CPU / Electronic</option>
+            <option value="sun">Sun / Solar</option>
+            <option value="shield">Shield / PPE</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Description</label>
+          <textarea id="catFormDescription" rows="2" class="form-textarea" placeholder="Brief scope of items in this category..."></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="EximusUtils.closeModal('addCategoryModal')" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Create Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 12. Excel Import Preview & Confirmation Modal -->
+  <div id="excelImportPreviewModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-xl w-full p-6 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-spreadsheet" class="w-5 h-5 text-emerald-600"></i>
+          <h3 class="text-base font-bold text-slate-900">Excel Import Validation & Preview</h3>
+        </div>
+        <button onclick="EximusUtils.closeModal('excelImportPreviewModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div class="space-y-4">
+        <div id="excelPreviewDetails"></div>
+        <div id="excelSheetsSummaryList" class="space-y-2"></div>
+
+        <!-- Import Mode Selection -->
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+          <p class="font-bold text-slate-800">Select Import Mode:</p>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="importMode" value="merge" checked class="text-blue-600">
+            <span><strong>Merge & Update Existing:</strong> Updates items if code matches, adds new items.</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="importMode" value="replace" class="text-blue-600">
+            <span><strong>Replace Entire Database:</strong> Clears current records and reloads from workbook.</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" onclick="EximusUtils.closeModal('excelImportPreviewModal')" class="btn-secondary text-xs">Cancel</button>
+          <button type="button" onclick="EximusExcel.executeImport()" class="btn-primary text-xs font-semibold py-2 px-4">
+            Proceed with Import
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. Global Search Modal (Ctrl+K) -->
+  <div id="globalSearchModal" class="fixed inset-0 z-50 modal-backdrop hidden items-start justify-center pt-20 p-4">
+    <div class="modal-card max-w-2xl w-full p-4 shadow-2xl">
+      <div class="relative mb-3">
+        <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+        <input id="globalSearchModalInput" type="text" placeholder="Search anything in inventory (press Esc to close)..." class="w-full pl-11 pr-4 py-3 bg-slate-100 rounded-xl border-none text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div id="globalSearchResultsList" class="max-h-96 overflow-y-auto space-y-1 divide-y divide-slate-100">
+        <div class="py-8 text-center text-slate-400 text-xs">
+          Type an item name, code, brand, or location to instantly search...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14. Notification Center Modal -->
+  <div id="notificationModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-md w-full p-5 max-h-[80vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="bell" class="w-4 h-4 text-blue-600"></i>
+          <h3 class="text-sm font-bold text-slate-900">Notification & Health Center</h3>
+        </div>
+        <button onclick="EximusUtils.closeModal('notificationModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="notificationModalList" class="space-y-2.5"></div>
+    </div>
+  </div>
+
+  <!-- 15. Standard Confirmation Modal -->
+  <div id="confirmModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-sm w-full p-6 text-center">
+      <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-600">
+        <i data-lucide="alert-circle" class="w-6 h-6 text-rose-600"></i>
+      </div>
+      <h3 id="confirmModalTitle" class="text-base font-bold text-slate-900">Confirm Action</h3>
+      <p id="confirmModalMessage" class="text-xs text-slate-500 mt-2 leading-relaxed">Are you sure you want to proceed?</p>
+      <div class="flex items-center justify-center gap-2 mt-6">
+        <button id="confirmModalCancelBtn" class="btn-secondary text-xs">Cancel</button>
+        <button id="confirmModalConfirmBtn" class="btn-primary text-xs">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 16. New Inter-Warehouse Stock Transfer Modal -->
+  <div id="newTransferModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">New Inter-Warehouse Stock Transfer</h3>
+            <p class="text-xs text-slate-500">Transfer electrical components between company warehouses</p>
+          </div>
+        </div>
+        <button onclick="window.EximusTransfers.closeNewTransferModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="formNewTransfer" onsubmit="window.EximusTransfers.handleNewTransferSubmit(event)" class="space-y-4">
+        <!-- Warehouses Selection (From -> To) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <div>
+            <label class="block text-xs font-semibold text-rose-700 mb-1 flex items-center gap-1">
+              <i data-lucide="building-2" class="w-3.5 h-3.5"></i> From Warehouse (Source) *
+            </label>
+            <select id="transferFromWarehouse" required class="form-select text-xs font-semibold">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-emerald-700 mb-1 flex items-center gap-1">
+              <i data-lucide="corner-down-right" class="w-3.5 h-3.5"></i> To Warehouse (Destination) *
+            </label>
+            <select id="transferToWarehouse" required class="form-select text-xs font-semibold">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Item Selection -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Item to Transfer *</label>
+          <select id="transferItemSelect" required class="form-select text-xs">
+            <!-- Populated by JS based on source warehouse stock -->
+          </select>
+        </div>
+
+        <!-- Stock Preview Container -->
+        <div id="transferItemPreviewBox">
+          <!-- Dynamically populated with current stock in both warehouses -->
+        </div>
+
+        <!-- Quantity & Date -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-700">Transfer Quantity *</label>
+              <span id="transferMaxQtyBadge" class="text-[11px] font-mono text-blue-600"></span>
+            </div>
+            <input id="transferQuantity" type="number" min="1" required class="form-input text-xs font-bold" placeholder="e.g. 5">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Transfer Date *</label>
+            <input id="transferDate" type="date" required class="form-input text-xs">
+          </div>
+        </div>
+
+        <!-- Authorized By & Driver/Logistics -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Authorized By</label>
+            <input id="transferAuthorizedBy" type="text" class="form-input text-xs" placeholder="e.g. Mr. Danushka / Site Engineer" value="Mr. Danushka">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Transport Vehicle / Driver</label>
+            <input id="transferDriverInfo" type="text" class="form-input text-xs" placeholder="e.g. WP-CA-4521 / K. Perera">
+          </div>
+        </div>
+
+        <!-- Reason / Notes -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Transfer Reason / Remarks</label>
+          <textarea id="transferNotes" rows="2" class="form-input text-xs" placeholder="e.g. Dispatched for solar inverter installation at Site A"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+          <button type="button" onclick="window.EximusTransfers.closeNewTransferModal()" class="btn-secondary text-xs">Cancel</button>
+          <button type="submit" class="btn-primary text-xs font-semibold flex items-center gap-1.5">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            Execute Transfer & Generate Waybill
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 17. Edit / Rename Warehouse Modal -->
+  <div id="editWarehouseModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+            <i data-lucide="building-2" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Edit / Rename Warehouse</h3>
+            <p class="text-xs text-slate-500">Update warehouse name, location, manager, and contact</p>
+          </div>
+        </div>
+        <button onclick="window.EximusTransfers.closeEditWarehouseModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="formEditWarehouse" onsubmit="window.EximusTransfers.handleWarehouseSubmit(event)" class="space-y-4">
+        <input type="hidden" id="editWhId">
+
+        <div class="grid grid-cols-3 gap-3">
+          <div class="col-span-1">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Code</label>
+            <input id="editWhCode" type="text" required class="form-input text-xs font-mono font-bold" placeholder="WH-01">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Warehouse Name *</label>
+            <input id="editWhName" type="text" required class="form-input text-xs font-bold text-blue-900" placeholder="e.g. Site A Storage Depot">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Facility Type</label>
+            <select id="editWhType" class="form-select text-xs">
+              <option value="Central Hub">Central Hub</option>
+              <option value="Site Store">Site Store</option>
+              <option value="Staging Yard">Staging Yard</option>
+              <option value="Workshop">Technical Workshop</option>
+              <option value="Field Depot">Field Depot</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Manager / Custodian</label>
+            <input id="editWhManager" type="text" class="form-input text-xs" placeholder="e.g. Mr. Danushka">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Physical Location / Address</label>
+            <input id="editWhLocation" type="text" class="form-input text-xs" placeholder="e.g. Project Site Alpha, Colombo">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Contact Phone</label>
+            <input id="editWhContact" type="text" class="form-input text-xs font-mono" placeholder="e.g. +94 77 123 4567">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Description / Notes</label>
+          <textarea id="editWhDescription" rows="2" class="form-input text-xs" placeholder="Description of items stored, security details, etc."></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+          <button type="button" onclick="window.EximusTransfers.closeEditWarehouseModal()" class="btn-secondary text-xs">Cancel</button>
+          <button type="submit" class="btn-primary text-xs font-semibold flex items-center gap-1.5">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            Save Warehouse Details
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 18. Printable Transfer Waybill Modal -->
+  <div id="waybillModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="modal-card max-w-3xl w-full p-6 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4 print:hidden">
+        <div class="flex items-center gap-2">
+          <i data-lucide="printer" class="w-5 h-5 text-blue-600"></i>
+          <h3 class="text-sm font-bold text-slate-900">Goods Dispatch Note / Transfer Waybill</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.EximusTransfers.printCurrentWaybill()" class="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            Print Note
+          </button>
+          <button onclick="window.EximusTransfers.closeWaybillModal()" class="text-slate-400 hover:text-slate-600 p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Content Container -->
+      <div id="waybillPrintContent"></div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- ======================================================================
+       APPLICATION SCRIPT SUITE
+       ====================================================================== -->
+  <!-- 1. Preloaded seed datasets -->
+  <script src="js/data-seed.js"></script>
+  <script src="js/data-materials.js"></script>
+  <script src="js/data-worksheet1.js"></script>
+
+  <!-- 2. Core storage engine -->
+  <script src="js/storage.js"></script>
+
+  <!-- 3. Helpers & UI utilities -->
+  <script src="js/utilities.js"></script>
+
+  <!-- 4. Functional feature modules -->
+  <script src="js/dashboard.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/categories.js"></script>
+  <script src="js/transactions.js"></script>
+  <script src="js/locations.js"></script>
+  <script src="js/transfers.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/excel.js"></script>
+
+  <!-- 5. Main application coordinator -->
+  <script src="js/app.js"></script>
+
+</body>
+</html>
+
