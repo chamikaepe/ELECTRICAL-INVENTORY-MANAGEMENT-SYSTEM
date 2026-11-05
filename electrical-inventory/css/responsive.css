@@ -1,0 +1,69 @@
+/* ==========================================================================
+   EXIMUS ELECTRICAL INVENTORY MANAGEMENT SYSTEM
+   responsive.css - Fluid Breakpoints, Mobile Navigation & Grid Adapters
+   ========================================================================== */
+
+@media (max-width: 1023px) {
+  #sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  }
+
+  main {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --header-height: 56px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .filter-controls {
+    flex-wrap: wrap !important;
+  }
+
+  .enterprise-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-card {
+    width: 95% !important;
+    max-height: 90vh !important;
+    margin: 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .header-actions {
+    gap: 0.5rem !important;
+  }
+
+  .header-time-container {
+    display: none !important;
+  }
+}
+
